@@ -134,3 +134,20 @@ main {
   cursor: not-allowed;
   box-shadow: none;
 }
+/* 링크 버튼 스타일 */
+.link-button {
+  display: inline-block;
+  text-decoration: none;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  color: #333;
+  border-radius: 15px;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  transition: background-color 0.2s;
+}
+
+.link-button:hover {
+  background-color: #e0e0e0;
+}
