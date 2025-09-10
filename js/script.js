@@ -8,11 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
-      // 모든 버튼과 패널에서 'active' 클래스 제거
       tabButtons.forEach(btn => btn.classList.remove('active'));
       contentPanels.forEach(panel => panel.classList.remove('active'));
 
-      // 클릭된 버튼과 해당하는 패널에 'active' 클래스 추가
       button.classList.add('active');
       const targetPanel = document.getElementById(button.dataset.tab);
       if (targetPanel) {
@@ -92,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (let i = 0; i < 6; i++) {
       await sleep(1000);
-
       const pickedNumber = pickedNumbers[i];
       const targetBall = resultBallElements[i];
 
@@ -107,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   lottoStartButton.addEventListener('click', startLottoDrawing);
-  initializeLottoPanel();
 
 
   // ===================================================
@@ -116,39 +112,55 @@ document.addEventListener('DOMContentLoaded', () => {
   const pensionDisplayContainer = document.getElementById('pension-number-display');
   const pensionGenerateBtn = document.getElementById('pension-generate-btn');
 
-  // 연금복권 자리별 CSS 색상 클래스 배열
   const pensionDigitColors = [
     'pension-color-1', 'pension-color-2', 'pension-color-3',
     'pension-color-4', 'pension-color-5', 'pension-color-6'
   ];
 
-  function generatePensionNumber() {
-    // 이전 번호 지우기
-    pensionDisplayContainer.innerHTML = '';
+  // ✅ [수정됨] 연금복권 패널을 초기화하는 함수
+  function initializePensionPanel() {
+    pensionDisplayContainer.innerHTML = ''; // Clear previous state
 
-    // 1. '조' 생성 (1~5)
-    const group = Math.floor(Math.random() * 5) + 1;
-
-    // 2. '번호' 6자리 생성
-    const digits = Math.floor(Math.random() * 1000000);
-    const formattedDigits = digits.toString().padStart(6, '0');
-
-    // 3. '조' 번호 공 만들기
+    // '조' 번호 placeholder
     const groupBall = document.createElement('div');
-    groupBall.className = 'ball'; // '조'는 기본 스타일
-    groupBall.textContent = group;
+    groupBall.className = 'ball';
+    groupBall.style.backgroundColor = '#e9ecef';
     pensionDisplayContainer.appendChild(groupBall);
 
-    // 4. '조' 텍스트 만들기
+    // '조' 텍스트
     const groupText = document.createElement('span');
     groupText.className = 'pension-text';
     groupText.textContent = '조';
     pensionDisplayContainer.appendChild(groupText);
 
-    // 5. 6자리 번호 공들 만들기
+    // 6자리 번호 placeholders
+    for (let i = 0; i < 6; i++) {
+      const digitBall = document.createElement('div');
+      digitBall.className = 'ball';
+      digitBall.style.backgroundColor = '#e9ecef';
+      pensionDisplayContainer.appendChild(digitBall);
+    }
+  }
+
+  function generatePensionNumber() {
+    pensionDisplayContainer.innerHTML = ''; // 이전 번호 지우기
+
+    const group = Math.floor(Math.random() * 5) + 1;
+    const digits = Math.floor(Math.random() * 1000000);
+    const formattedDigits = digits.toString().padStart(6, '0');
+
+    const groupBall = document.createElement('div');
+    groupBall.className = 'ball';
+    groupBall.textContent = group;
+    pensionDisplayContainer.appendChild(groupBall);
+
+    const groupText = document.createElement('span');
+    groupText.className = 'pension-text';
+    groupText.textContent = '조';
+    pensionDisplayContainer.appendChild(groupText);
+
     for (let i = 0; i < formattedDigits.length; i++) {
       const digitBall = document.createElement('div');
-      // 각 자리에 맞는 색상 클래스 부여
       digitBall.className = `ball ${pensionDigitColors[i]}`;
       digitBall.textContent = formattedDigits[i];
       pensionDisplayContainer.appendChild(digitBall);
@@ -156,6 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   pensionGenerateBtn.addEventListener('click', generatePensionNumber);
-  generatePensionNumber(); // 페이지 로드 시 초기 번호 생성
+
+
+  // ===============================================
+  // 4. 페이지 초기화 (Page Initialization)
+  // ===============================================
+  initializeLottoPanel();
+  initializePensionPanel(); // ✅ [수정됨] 페이지 로드 시 연금복권 패널 초기화
 });
 
