@@ -10,30 +10,58 @@
 
 <div class="app-container">
   <header>
-    <h1>🍀 행운의 로또 번호 🍀</h1>
+    <nav class="tabs">
+      <button class="tab-button active" data-tab="lotto-645">로또 6/45</button>
+      <button class="tab-button" data-tab="pension-lottery">연금복권 720+</button>
+    </nav>
   </header>
 
   <main>
-    <section class="result-panel">
-      <h2>🎉 당첨 번호 🎉</h2>
-      <div id="result-balls" class="ball-container">
-      </div>
-    </section>
+    <!-- ==================== Lotto 6/45 Panel ==================== -->
+    <div id="lotto-645" class="content-panel active">
+      <h1>🍀 로또 6/45 행운 번호</h1>
+      <section class="result-panel">
+        <h2>🎉 당첨 번호 🎉</h2>
+        <div id="result-balls" class="ball-container">
+          <!-- JS will populate this -->
+        </div>
+      </section>
 
-    <section id="lotto-machine" class="lotto-machine">
-    </section>
+      <section id="lotto-machine" class="lotto-machine">
+        <!-- JS will populate this -->
+      </section>
 
-    <section class="control-panel">
-      <button id="start-button" class="start-button">
-        <span class="icon">🎰</span> 추첨 시작!
-      </button>
-      <a href="https://m.dhlottery.co.kr/gameResult.do?method=byWin" target="_blank" class="link-button">
-        🔗 전주 당첨번호 확인하기
-      </a>
-    </section>
+      <section class="control-panel">
+        <button id="start-button" class="start-button">
+          <span class="icon">🎰</span> 추첨 시작!
+        </button>
+        <a href="https://m.dhlottery.co.kr/gameResult.do?method=byWin" target="_blank" class="link-button">
+          🔗 전주 당첨번호 확인하기
+        </a>
+      </section>
+    </div>
+
+    <!-- ==================== Pension Lottery 720+ Panel ==================== -->
+    <div id="pension-lottery" class="content-panel">
+      <h1>🍀 연금복권 720+ 행운 번호</h1>
+      <section class="result-panel">
+        <div id="pension-number-display" class="ball-container pension-container">
+          <!-- JS will create number balls here -->
+        </div>
+      </section>
+      <section class="control-panel">
+        <button id="pension-generate-btn" class="start-button">
+          <span class="icon">🔄</span> 새 번호 생성
+        </button>
+        <a href="https://m.dhlottery.co.kr/gameResult.do?method=win720" target="_blank" class="link-button">
+          🔗 전주 당첨번호 확인하기
+        </a>
+      </section>
+    </div>
   </main>
 </div>
 
 <script src="js/script.js"></script>
 </body>
 </html>
+

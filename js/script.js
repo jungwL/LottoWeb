@@ -1,13 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const resultBallsContainer = document.getElementById('result-balls');
+
+  // ===============================================
+  // 1. 탭 전환 로직 (Tab Switching Logic)
+  // ===============================================
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const contentPanels = document.querySelectorAll('.content-panel');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // 모든 버튼과 패널에서 'active' 클래스 제거
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      contentPanels.forEach(panel => panel.classList.remove('active'));
+
+      // 클릭된 버튼과 해당하는 패널에 'active' 클래스 추가
+      button.classList.add('active');
+      const targetPanel = document.getElementById(button.dataset.tab);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    });
+  });
+
+
+  // ===============================================
+  // 2. 로또 6/45 로직 (Lotto 6/45 Logic)
+  // ===============================================
+  const lottoResultContainer = document.getElementById('result-balls');
   const lottoMachine = document.getElementById('lotto-machine');
-  const startButton = document.getElementById('start-button');
+  const lottoStartButton = document.getElementById('start-button');
 
-  let isDrawing = false;
+  let isLottoDrawing = false;
   let shuffleTimer;
-  let selectedBalls = [];
 
-  // 공의 색상을 결정하는 함수 (CSS 클래스 이름 반환)
   const getBallColorClass = (number) => {
     if (number <= 10) return 'color-yellow';
     if (number <= 20) return 'color-blue';
@@ -16,102 +40,122 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'color-green';
   };
 
-  // 지연 함수
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // 초기 상태 설정
-  const initialize = () => {
-    resultBallsContainer.innerHTML = '';
-    for (let i = 0; i < 7; i++) {
-      if (i === 6) {
-        const plus = document.createElement('div');
-        plus.className = 'bonus-separator';
-        plus.textContent = '+';
-        resultBallsContainer.appendChild(plus);
-      }
-      const ball = document.createElement('div');
-      ball.className = 'ball placeholder';
-      resultBallsContainer.appendChild(ball);
+  const initializeLottoPanel = () => {
+    lottoResultContainer.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'ball';
+      placeholder.style.backgroundColor = '#e9ecef';
+      lottoResultContainer.appendChild(placeholder);
     }
   };
 
-  const reset = () => {
-    isDrawing = false;
-    selectedBalls = [];
+  const startLottoDrawing = async () => {
+    if (isLottoDrawing) return;
+    isLottoDrawing = true;
+
+    lottoStartButton.disabled = true;
+    lottoStartButton.innerHTML = '<span>🔄</span> 섞는 중...';
+    initializeLottoPanel();
     lottoMachine.innerHTML = '';
-    initialize();
-    startButton.disabled = false;
-    startButton.innerHTML = '<span class="icon">🎰</span> 추첨 시작!';
-  };
 
-  // 추첨 시작 함수
-  const startDrawing = async () => {
-    if (isDrawing) return;
-    isDrawing = true;
+    const allBalls = Array.from({ length: 45 }, (_, i) => i + 1);
 
-    reset();
-
-    startButton.disabled = true;
-    startButton.textContent = '섞는 중...';
-
-    // 1. 45개 공 생성 및 머신에 추가
-    const allBalls = [];
-    for (let i = 1; i <= 45; i++) {
-      const ballData = { number: i, colorClass: getBallColorClass(i) };
-      allBalls.push(ballData);
-
+    const machineBallElements = allBalls.map(num => {
       const ballElement = document.createElement('div');
-      ballElement.className = `ball ball-small ${ballData.colorClass}`;
-      ballElement.textContent = i;
-      ballElement.style.left = `${Math.random() * 265}px`; // 300 - 35
-      ballElement.style.top = `${Math.random() * 265}px`;
+      ballElement.className = `ball machine-ball ${getBallColorClass(num)}`;
+      ballElement.textContent = num;
+      ballElement.style.left = `${Math.random() * (300 - 35)}px`;
+      ballElement.style.top = `${Math.random() * (300 - 35)}px`;
       lottoMachine.appendChild(ballElement);
-    }
+      return ballElement;
+    });
 
-    // 2. 공 섞기 애니메이션
-    const machineBalls = lottoMachine.children;
     shuffleTimer = setInterval(() => {
-      for (const ball of machineBalls) {
-        ball.style.left = `${Math.random() * 265}px`;
-        ball.style.top = `${Math.random() * 265}px`;
-      }
+      machineBallElements.forEach(ball => {
+        ball.style.left = `${Math.random() * (300 - 35)}px`;
+        ball.style.top = `${Math.random() * (300 - 35)}px`;
+      });
     }, 500);
 
-    await sleep(3000); // 3초간 섞기
+    await sleep(3000);
     clearInterval(shuffleTimer);
-    startButton.textContent = '추첨 중...';
+    lottoStartButton.innerHTML = '<span>👀</span> 추첨 중...';
 
-    // 3. 공 뽑기
-    const availableBalls = [...allBalls];
-    const resultBallElements = document.querySelectorAll('.result-panel .ball');
+    allBalls.sort(() => Math.random() - 0.5);
+    const pickedNumbers = allBalls.slice(0, 6);
+    pickedNumbers.sort((a, b) => a - b);
 
-    for (let i = 0; i < 7; i++) {
-      await sleep(1200); // 1.2초 간격
+    const resultBallElements = lottoResultContainer.querySelectorAll('.ball');
 
-      const pickedIndex = Math.floor(Math.random() * availableBalls.length);
-      const pickedBallData = availableBalls.splice(pickedIndex, 1)[0];
-      selectedBalls.push(pickedBallData);
+    for (let i = 0; i < 6; i++) {
+      await sleep(1000);
 
-      // 머신에서 해당 공 숨기기
-      for (const ball of machineBalls) {
-        if (parseInt(ball.textContent) === pickedBallData.number) {
-          ball.style.display = 'none';
-          break;
-        }
-      }
-
-      // 결과 패널에 공 표시
+      const pickedNumber = pickedNumbers[i];
       const targetBall = resultBallElements[i];
-      targetBall.className = `ball ${pickedBallData.colorClass}`;
-      targetBall.textContent = pickedBallData.number;
+
+      targetBall.style.backgroundColor = '';
+      targetBall.className = `ball ${getBallColorClass(pickedNumber)}`;
+      targetBall.textContent = pickedNumber;
     }
 
-    // 4. 추첨 완료
-    isDrawing = false;
-    startButton.disabled = false;
-    startButton.innerHTML = '<span class="icon">🎰</span> 다시 추첨!';
+    isLottoDrawing = false;
+    lottoStartButton.disabled = false;
+    lottoStartButton.innerHTML = '<span>🎰</span> 다시 추첨!';
   };
 
-  startButton.addEventListener('click', startDrawing);
-  initialize(); // 페이지 로드 시 초기화
+  lottoStartButton.addEventListener('click', startLottoDrawing);
+  initializeLottoPanel();
+
+
+  // ===================================================
+  // 3. 연금복권 720+ 로직 (Pension Lottery 720+ Logic)
+  // ===================================================
+  const pensionDisplayContainer = document.getElementById('pension-number-display');
+  const pensionGenerateBtn = document.getElementById('pension-generate-btn');
+
+  // 연금복권 자리별 CSS 색상 클래스 배열
+  const pensionDigitColors = [
+    'pension-color-1', 'pension-color-2', 'pension-color-3',
+    'pension-color-4', 'pension-color-5', 'pension-color-6'
+  ];
+
+  function generatePensionNumber() {
+    // 이전 번호 지우기
+    pensionDisplayContainer.innerHTML = '';
+
+    // 1. '조' 생성 (1~5)
+    const group = Math.floor(Math.random() * 5) + 1;
+
+    // 2. '번호' 6자리 생성
+    const digits = Math.floor(Math.random() * 1000000);
+    const formattedDigits = digits.toString().padStart(6, '0');
+
+    // 3. '조' 번호 공 만들기
+    const groupBall = document.createElement('div');
+    groupBall.className = 'ball'; // '조'는 기본 스타일
+    groupBall.textContent = group;
+    pensionDisplayContainer.appendChild(groupBall);
+
+    // 4. '조' 텍스트 만들기
+    const groupText = document.createElement('span');
+    groupText.className = 'pension-text';
+    groupText.textContent = '조';
+    pensionDisplayContainer.appendChild(groupText);
+
+    // 5. 6자리 번호 공들 만들기
+    for (let i = 0; i < formattedDigits.length; i++) {
+      const digitBall = document.createElement('div');
+      // 각 자리에 맞는 색상 클래스 부여
+      digitBall.className = `ball ${pensionDigitColors[i]}`;
+      digitBall.textContent = formattedDigits[i];
+      pensionDisplayContainer.appendChild(digitBall);
+    }
+  }
+
+  pensionGenerateBtn.addEventListener('click', generatePensionNumber);
+  generatePensionNumber(); // 페이지 로드 시 초기 번호 생성
 });
+
