@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     allBalls.sort(() => Math.random() - 0.5);
     const pickedNumbers = allBalls.slice(0, 6);
-    pickedNumbers.sort((a, b) => a - b);
 
     const resultBallElements = lottoResultContainer.querySelectorAll('.ball');
 
